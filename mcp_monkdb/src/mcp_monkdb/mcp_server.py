@@ -159,6 +159,25 @@ def run_select_query(query: str):
         return {"status": "error", "message": f"Unexpected error: {str(e)}"}
 
 
+@mcp.tool()
+def health_check():
+    """Simple health check on MonkDB"""
+    try:
+        cursor = create_monkdb_client()
+        cursor.execute("SELECT 1")
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@mcp.tool()
+def get_server_version():
+    """Returns the version of MonkDB server"""
+    cursor = create_monkdb_client()
+    result = cursor.execute("select version() AS version")
+    return result
+
+
 def create_monkdb_client():
     config = get_config().get_client_config()
     try:
