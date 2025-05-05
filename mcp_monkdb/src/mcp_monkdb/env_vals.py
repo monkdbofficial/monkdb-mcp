@@ -64,14 +64,12 @@ class MonkDBConfiguration:
         Returns:
             dict: Config ready to be passed to client.connect()
         """
+        connection_url = f"http://{self.username}:{self.password}@{self.host}:{self.port}"
         config = {
-            "host": self.host,
-            "port": self.port,
+            "url": connection_url,
             "username": self.username,
-            "password": self.password,
         }
 
-        # Add optional schema if set
         if self.schema:
             config["schema"] = self.schema
 
