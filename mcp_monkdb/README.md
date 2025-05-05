@@ -7,28 +7,28 @@ An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabli
 ### Tools
 
 * `run_select_query`
-  * Execute SQL queries on your MonkDB cluster.
-  * Input: `sql` (string): The SQL query to execute.
-  * **Rejects non-select queries** 
+    * Execute SQL queries on your MonkDB cluster.
+    * Input: `sql` (string): The SQL query to execute.
+    * **Rejects non-select queries** 
 
 * `list_tables`
-  * List all tables in `monkdb` schema.
+    * List all tables in `monkdb` schema.
 
 * `health_check`
-  * Does a health check ping on MonkDB.
-  * Returns either `ok` or an error message.
+    * Does a health check ping on MonkDB.
+    * Returns either `ok` or an error message.
 
 * `get_server_version`
-  * Returns the server version of MonkDB.
+    * Returns the server version of MonkDB.
 
 * `describe_table`
-  * Describe a table's columns in MonkDB.
+    * Describe a table's columns in MonkDB.
 
 ## Configuration
 
 1. Open the Claude Desktop configuration file located at:
-   * On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   * On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+    * On macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    * On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 2. Add the following:
 
