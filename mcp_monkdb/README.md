@@ -1,5 +1,7 @@
 # MonkDB MCP Server
 
+![Python](https://img.shields.io/badge/Python-3.13%2B-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Stable](https://img.shields.io/badge/stability-stable-brightgreen) ![Version](https://img.shields.io/badge/version-0.1.0-blue) ![Last Updated](https://img.shields.io/badge/last%20updated-May%2005%202025-brightgreen)
+
 An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabling Claude like LLMs to execute database-related tools such as querying, table inspection, and server health checks.
 
 ## Features
