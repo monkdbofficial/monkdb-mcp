@@ -1,6 +1,6 @@
 # MonkDB MCP Server
 
-An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabling Claude to execute database-related tools such as querying, table inspection, and server health checks.
+An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabling Claude like LLMs to execute database-related tools such as querying, table inspection, and server health checks.
 
 ## Features
 
