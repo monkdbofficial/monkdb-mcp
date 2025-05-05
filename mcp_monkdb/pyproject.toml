@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "An MCP server for MonkDB"
 license = "Apache-2.0"
 authors = [
-    {name = "Krishnakant Challa",email = "krishna.challa@monkdb.com"}
+    {name = "MonkDB Developers",email = "devs@monkdb.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
