@@ -27,7 +27,7 @@ class MonkDBConfiguration:
 
     def __init__(self):
         """This initializes the config from environment variables."""
-        self._validate_required_vars()
+        self._validate_mandatory_vars()
 
     @property
     def host(self) -> str:
