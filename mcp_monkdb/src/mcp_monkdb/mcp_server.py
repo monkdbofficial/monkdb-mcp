@@ -172,9 +172,9 @@ def health_check():
 
 @mcp.tool()
 def get_server_version():
-    """Returns the version of MonkDB server"""
+    """Returns the version of MonkDB server using version() scalar function"""
     cursor = create_monkdb_client()
-    result = cursor.execute("select version() AS version")
+    result = cursor.execute("SELECT version() AS version")
     return result
 
 
