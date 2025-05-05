@@ -2,7 +2,7 @@ import atexit
 from dataclasses import asdict, dataclass, field, is_dataclass
 import json
 import logging
-from typing import Any, List, Optional
+from typing import Any, List
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from monkdb import client
@@ -10,28 +10,7 @@ from monkdb import client
 import concurrent
 
 from mcp_monkdb.env_vals import get_config
-
-
-@dataclass
-class Column:
-    table_schema: str
-    table_name: str
-    column_name: str
-    data_type: str
-    is_nullable: str
-    column_default: Optional[str] = None
-
-
-@dataclass
-class Table:
-    table_schema: str
-    table_name: str
-    table_type: str
-    number_of_shards: Optional[int] = None
-    number_of_replicas: Optional[str] = None
-    clustered_by: Optional[str] = None
-    created: Optional[str] = None
-    columns: List[Column] = field(default_factory=list)
+from mcp_monkdb.models import Column, Table
 
 
 MCP_SERVER_NAME = "mcp-monkdb"
