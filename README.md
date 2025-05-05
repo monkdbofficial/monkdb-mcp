@@ -84,7 +84,7 @@ The following environment variables are used to configure the MonkDB connection:
 #### Example Configurations
 
 ```env
-MONKDB_HOST=xx.xx.xx.xxx
+MONKDB_HOST=xx.xx.xx.xxx #update the hostname or ip address of monkdb
 MONKDB_USER=testuser
 MONKDB_PASSWORD=testpassword
 MONKDB_API_PORT=4200
