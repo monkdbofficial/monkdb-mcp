@@ -64,6 +64,28 @@ Update the environment variables to point to your own MonkDB cluster.
 
 4. Restart Claude Desktop to apply the changes.
 
+**Note**: you may also use `poetry` instead of `uv`.
+
+```json
+"mcpServers": {
+  "mcp-monkdb": {
+    "command": "poetry",
+    "args": [
+      "run",
+      "python",
+      "-m",
+      "mcp_monkdb"
+    ],
+    "env": {
+      "MONKDB_HOST": "<monkdb-host>",
+      "MONKDB_API_PORT": "<monkdb-port>",
+      "MONKDB_USER": "<monkdb-user>",
+      "MONKDB_PASSWORD": "<monkdb-password>"
+    }
+  }
+}
+```
+
 
 ### Environment Variables
 
