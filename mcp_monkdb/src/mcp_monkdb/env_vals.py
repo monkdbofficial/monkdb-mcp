@@ -22,7 +22,7 @@ class MonkDBConfiguration:
         MONKDB_PORT: The port number to connect with MonkDB (default is 4200)
 
     Optional environment variables (with defaults):
-        MONKDB_DATABASE: Default database schema to use which is monkdb.
+        MONKDB_SCHEMA: Default database schema to use which is monkdb.
     """
 
     def __init__(self):
