@@ -14,33 +14,23 @@ from mcp_monkdb.env_vals import get_config
 
 @dataclass
 class Column:
-    database: str
-    table: str
-    name: str
-    column_type: str
-    default_kind: Optional[str]
-    default_expression: Optional[str]
-    comment: Optional[str]
+    table_schema: str
+    table_name: str
+    column_name: str
+    data_type: str
+    is_nullable: str
+    column_default: Optional[str] = None
 
 
 @dataclass
 class Table:
-    database: str
-    name: str
-    engine: str
-    create_table_query: str
-    dependencies_database: str
-    dependencies_table: str
-    engine_full: str
-    sorting_key: str
-    primary_key: str
-    total_rows: int
-    total_bytes: int
-    total_bytes_uncompressed: int
-    parts: int
-    active_parts: int
-    total_marks: int
-    comment: Optional[str] = None
+    table_schema: str
+    table_name: str
+    table_type: str
+    number_of_shards: Optional[int] = None
+    number_of_replicas: Optional[str] = None
+    clustered_by: Optional[str] = None
+    created: Optional[str] = None
     columns: List[Column] = field(default_factory=list)
 
 
@@ -69,12 +59,12 @@ deps = [
 mcp = FastMCP(MCP_SERVER_NAME, dependencies=deps)
 
 
-def result_to_table(query_columns, result) -> List[Table]:
-    return [Table(**dict(zip(query_columns, row))) for row in result]
-
-
 def result_to_column(query_columns, result) -> List[Column]:
     return [Column(**dict(zip(query_columns, row))) for row in result]
+
+
+def result_to_table(query_columns, result) -> List[Table]:
+    return [Table(**dict(zip(query_columns, row))) for row in result]
 
 
 def to_json(obj: Any) -> str:
@@ -176,6 +166,20 @@ def get_server_version():
     cursor = create_monkdb_client()
     result = cursor.execute("SELECT version() AS version")
     return result
+
+
+@mcp.tool()
+def describe_table(table_name: str):
+    """Describe a table's columns in MonkDB"""
+    cursor = create_monkdb_client()
+    result = cursor.execute(f"""
+        SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
+        FROM information_schema.columns
+        WHERE table_schema = 'monkdb' AND table_name = '{table_name}';
+    """)
+    query_columns = ["table_schema", "table_name", "column_name",
+                     "data_type", "is_nullable", "column_default"]
+    return result_to_column(query_columns, result.result_rows)
 
 
 def create_monkdb_client():
