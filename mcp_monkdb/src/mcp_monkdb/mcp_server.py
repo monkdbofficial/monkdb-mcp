@@ -61,31 +61,38 @@ def list_tables():
     """List available MonkDB tables under monkdb schema"""
     logger.info("Listing all tables")
     cursor = create_monkdb_client()
-    result = cursor.execute(f"""
-        SELECT table_name FROM information_schema.tables where table_schema = 'monkdb';""")
-    logger.info(
-        f"Found {len(result) if isinstance(result, list) else 1} tables")
-    return result
+    try:
+        cursor.execute("""
+            SELECT table_name FROM information_schema.tables WHERE table_schema = 'monkdb';
+        """)
+        rows = cursor.fetchall()
+        if not rows:
+            raise ValueError("No tables found in schema 'monkdb'")
+        logger.info(f"Found {len(rows)} tables")
+        return [{"table_name": row[0]} for row in rows]
+    except Exception as e:
+        logger.error(f"Failed to list tables: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 def execute_query(query: str):
     cursor = create_monkdb_client()
     try:
-        res = cursor.execute(query)
-        column_names = res.column_names
-        rows = []
-        for row in res.result_rows:
-            row_dict = {}
-            for i, col_name in enumerate(column_names):
-                row_dict[col_name] = row[i]
-            rows.append(row_dict)
-        logger.info(f"Query returned {len(rows)} rows")
-        return rows
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        column_names = [desc[0] for desc in cursor.description]
+
+        result = []
+        for row in rows:
+            result.append(
+                {column_names[i]: value for i, value in enumerate(row)})
+
+        logger.info(f"Query returned {len(result)} rows")
+        return result
+
     except Exception as err:
         logger.error(f"Error executing query: {err}")
-        # Return a structured dictionary rather than a string to ensure proper serialization
-        # by the MCP protocol. String responses for errors can cause BrokenResourceError.
-        return {"error": str(err)}
+        return {"status": "error", "message": f"Query failed: {str(err)}"}
 
 
 @mcp.tool()
@@ -151,14 +158,23 @@ def get_server_version():
 def describe_table(table_name: str):
     """Describe a table's columns in MonkDB"""
     cursor = create_monkdb_client()
-    result = cursor.execute(f"""
-        SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
-        FROM information_schema.columns
-        WHERE table_schema = 'monkdb' AND table_name = '{table_name}';
-    """)
-    query_columns = ["table_schema", "table_name", "column_name",
-                     "data_type", "is_nullable", "column_default"]
-    return result_to_column(query_columns, result.result_rows)
+    try:
+        query = """
+            SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns
+            WHERE table_schema = 'monkdb' AND table_name = %s;
+        """
+        cursor.execute(query, (table_name,))
+        rows = cursor.fetchall()
+        if not rows:
+            raise ValueError(f"No columns found for table: {table_name}")
+
+        query_columns = [desc[0] for desc in cursor.description]
+        return result_to_column(query_columns, rows)
+
+    except Exception as e:
+        logger.error(f"Failed to describe table '{table_name}': {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 def create_monkdb_client():
