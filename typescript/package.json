@@ -2,9 +2,22 @@
   "name": "@monkdb/monkdb-mcp",
   "version": "0.1.0",
   "type": "module",
-  "main": "index.js",
+  "description": "MCP Server for MonkDB in TypeScript stack",
+  "main": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./build/index.mjs",
+      "types": "./build/index.d.ts"
+    }
+  },
+  "files": [
+    "build"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "clean": "rm -rf build",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "monkdb",
@@ -16,7 +29,6 @@
   ],
   "author": "MonkDB Devs <devs@monkdb.com>",
   "license": "Apache-2.0",
-  "description": "MCP Server for MonkDB in typescript stack",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.0",
     "@monkdb/monkdb": "^0.1.6",
