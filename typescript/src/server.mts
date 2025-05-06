@@ -197,6 +197,8 @@ server.tool(
     }
 );
 
-// Start the server
-const transport = new StdioServerTransport();
-await server.connect(transport);
+// With this:
+export async function startMonkDBMCPServer(): Promise<void> {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+}
