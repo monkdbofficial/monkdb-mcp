@@ -10,6 +10,10 @@ const server = new McpServer({
     version: '0.1.0',
 });
 
+function errorMessage(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+}
+
 // Tool: list_tables
 server.tool(
     'list_tables',
@@ -17,28 +21,26 @@ server.tool(
     async () => {
         const cursor = createMonkDBClient();
         try {
-            await cursor.execute(
-                `SELECT table_name FROM information_schema.tables WHERE table_schema = $1`,
-                [process.env.MONKDB_SCHEMA || 'monkdb']
-            );
+            await cursor.execute(`
+        SELECT table_name FROM information_schema.tables 
+        WHERE table_schema = $1
+      `, [process.env.MONKDB_SCHEMA || 'monkdb']);
 
             const rows = cursor.fetchall();
-            cursor.close();
             return {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify(rows.map((row: any) => row.table_name)),
+                        text: JSON.stringify(rows.map((row: any[]) => row[0]), null, 2),
                     },
                 ],
             };
-        } catch (error) {
-            console.error('[list_tables] Error:', error);
+        } catch (err) {
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `Error listing tables: ${(error as Error).message}`,
+                        text: `Error listing tables: ${errorMessage(err)}`,
                     },
                 ],
             };
@@ -70,22 +72,20 @@ server.tool(
         try {
             await cursor.execute(query);
             const rows = cursor.fetchall();
-            cursor.close();
             return {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify(rows),
+                        text: JSON.stringify(rows, null, 2),
                     },
                 ],
             };
-        } catch (error) {
-            console.error('[run_select_query] Error:', error);
+        } catch (err) {
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `Query failed: ${(error as Error).message}`,
+                        text: `Query failed: ${errorMessage(err)}`,
                     },
                 ],
             };
@@ -103,7 +103,6 @@ server.tool(
         const cursor = createMonkDBClient();
         try {
             await cursor.execute('SELECT 1');
-            cursor.close();
             return {
                 content: [
                     {
@@ -112,16 +111,12 @@ server.tool(
                     },
                 ],
             };
-        } catch (error) {
-            let message = 'Unknown error';
-            if (error instanceof Error) {
-                message = error.message;
-            }
+        } catch (err) {
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `error: ${message}`,
+                        text: `Health check failed: ${errorMessage(err)}`,
                     },
                 ],
             };
@@ -140,22 +135,20 @@ server.tool(
         try {
             await cursor.execute('SELECT version() AS version');
             const rows = cursor.fetchall();
-            cursor.close();
             return {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify(rows),
+                        text: JSON.stringify(rows, null, 2),
                     },
                 ],
             };
-        } catch (error) {
-            console.error('[get_server_version] Error:', error);
+        } catch (err) {
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `error: ${(error as Error).message}`,
+                        text: `Error retrieving version: ${errorMessage(err)}`,
                     },
                 ],
             };
@@ -174,36 +167,33 @@ server.tool(
     async ({ table_name }) => {
         const cursor = createMonkDBClient();
         try {
-            await cursor.execute(
-                `SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
-           FROM information_schema.columns
-           WHERE table_schema = $1 AND table_name = $2`,
-                [process.env.MONKDB_SCHEMA || 'monkdb', table_name]
-            );
-            const rows = cursor.fetchall();
+            await cursor.execute(`
+        SELECT table_schema, table_name, column_name, data_type, is_nullable, column_default
+        FROM information_schema.columns
+        WHERE table_schema = $1 AND table_name = $2
+      `, [process.env.MONKDB_SCHEMA || 'monkdb', table_name]);
 
+            const rows = cursor.fetchall();
             return {
                 content: [
                     {
                         type: 'text',
-                        text: JSON.stringify(rows),
+                        text: JSON.stringify(rows, null, 2),
                     },
                 ],
             };
-        } catch (error) {
-            console.error(`[describe_table] Error for table ${table_name}:`, error);
+        } catch (err) {
             return {
                 content: [
                     {
                         type: 'text',
-                        text: `Failed to describe table "${table_name}": ${(error as Error).message}`,
+                        text: `Failed to describe table "${table_name}": ${errorMessage(err)}`,
                     },
                 ],
             };
         } finally {
             cursor.close();
         }
-
     }
 );
 
