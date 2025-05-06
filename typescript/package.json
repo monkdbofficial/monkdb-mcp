@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf build",
-    "prepublishOnly": "npm run clean && npm run build"
+    "test": "vitest",
+    "prepublishOnly": "npm run clean && npm run test && npm run build"
   },
   "keywords": [
     "monkdb",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.11",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
   }
 }

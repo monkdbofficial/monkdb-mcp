@@ -7,7 +7,7 @@ import { createMonkDBClient } from './monkdbClient.mjs';
 
 const server = new McpServer({
     name: 'mcp-monkdb',
-    version: '0.1.0',
+    version: '0.1.1',
 });
 
 function errorMessage(err: unknown): string {
