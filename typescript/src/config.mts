@@ -1,4 +1,4 @@
-// config.mts
+// src/config.mts
 
 import dotenv from 'dotenv';
 

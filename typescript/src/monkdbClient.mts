@@ -1,4 +1,4 @@
-// monkdbClient.mts
+// src/monkdbClient.mts
 
 import { MonkConnection } from '@monkdb/monkdb';
 import { config } from './config.mjs';

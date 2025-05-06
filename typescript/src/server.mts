@@ -1,4 +1,4 @@
-// server.mts
+// src/server.mts
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -197,7 +197,7 @@ server.tool(
     }
 );
 
-// With this:
+// Start the server
 export async function startMonkDBMCPServer(): Promise<void> {
     const transport = new StdioServerTransport();
     await server.connect(transport);
