@@ -1,3 +1,5 @@
+// config.mts
+
 import dotenv from 'dotenv';
 
 dotenv.config();
