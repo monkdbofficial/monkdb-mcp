@@ -1,6 +1,6 @@
 # @monkdb/monkdb-mcp
 
-> Modular Command Protocol (MCP) Server for **MonkDB** – enabling LLMs to interact with MonkDB securely and efficiently using standardized tools like `run_select_query`, `describe_table`, `health_check`, and more.
+> Model Context Protocol (MCP) Server for **MonkDB** – enabling LLMs to interact with MonkDB securely and efficiently using standardized tools like `run_select_query`, `describe_table`, `health_check`, and more.
 
 ![npm](https://img.shields.io/npm/v/@monkdb/monkdb-mcp)
 ![license](https://img.shields.io/npm/l/@monkdb/monkdb-mcp)

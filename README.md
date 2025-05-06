@@ -3,7 +3,7 @@
 ![typescript-support](https://img.shields.io/badge/TypeScript-Supported-blue?logo=typescript)
 ![python-support](https://img.shields.io/badge/Python-Supported-blueviolet?logo=python)
 
-A **Modular Command Protocol (MCP)** server acts as a standardized bridge between large language models (LLMs) like Claude and databases such as MonkDB, allowing these models to perform advanced database operations securely and efficiently through natural language instructions.
+A **Model Context Protocol (MCP)** server acts as a standardized bridge between large language models (LLMs) like Claude and databases such as MonkDB, allowing these models to perform advanced database operations securely and efficiently through natural language instructions.
 
 ## What is MCP?
 
