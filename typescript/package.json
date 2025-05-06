@@ -1,0 +1,31 @@
+{
+  "name": "@monkdb/monkdb-mcp",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "monkdb",
+    "mcp",
+    "model context protocol",
+    "olap",
+    "database",
+    "llm"
+  ],
+  "author": "MonkDB Devs <devs@monkdb.com>",
+  "license": "Apache-2.0",
+  "description": "MCP Server for MonkDB in typescript stack",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "@monkdb/monkdb": "^0.1.6",
+    "@types/pg": "^8.12.0",
+    "dotenv": "^16.5.0",
+    "pg": "^8.15.6",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.11",
+    "typescript": "^5.8.3"
+  }
+}
