@@ -105,3 +105,8 @@ This project is licensed under Apache-2.0.
 ## Contact Us
 
 You may reach out to us at [support@monkdb.com](mailto:support@monkdb.com)
+
+---
+
+> [!CAUTION]
+> It is important to treat your MCP database user as you would any external client connecting to your database, granting only the minimum necessary privileges required for its operation. The use of default or administrative users should be strictly avoided at all times.
