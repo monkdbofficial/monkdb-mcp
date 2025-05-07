@@ -1,4 +1,4 @@
-MonkDB MCP Server Contributor License Agreement
+# MonkDB MCP Server Contributor License Agreement
 
 I give **MonkDB** permission to license my contributions on any terms they like. I am giving them this license in order to make it possible for them to accept my contributions into their project.
 
