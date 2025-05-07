@@ -2,6 +2,9 @@
 
 > Model Context Protocol (MCP) Server for **MonkDB** – enabling LLMs to interact with MonkDB securely and efficiently using standardized tools like `run_select_query`, `describe_table`, `health_check`, and more.
 
+> [!CAUTION]
+> It is important to treat your MCP database user as you would any external client connecting to your database, granting only the minimum necessary privileges required for its operation. The use of default or administrative users should be strictly avoided at all times.
+
 ![npm](https://img.shields.io/npm/v/@monkdb/monkdb-mcp)
 ![license](https://img.shields.io/npm/l/@monkdb/monkdb-mcp)
 ![typescript](https://img.shields.io/badge/TypeScript-ESM-blue)
@@ -107,6 +110,3 @@ This project is licensed under Apache-2.0.
 You may reach out to us at [support@monkdb.com](mailto:support@monkdb.com)
 
 ---
-
-> [!CAUTION]
-> It is important to treat your MCP database user as you would any external client connecting to your database, granting only the minimum necessary privileges required for its operation. The use of default or administrative users should be strictly avoided at all times.
