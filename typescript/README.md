@@ -1,4 +1,4 @@
-# @monkdb/monkdb-mcp
+# Official @monkdb/monkdb-mcp
 
 > Model Context Protocol (MCP) Server for **MonkDB** – enabling LLMs to interact with MonkDB securely and efficiently using standardized tools like `run_select_query`, `describe_table`, `health_check`, and more.
 
