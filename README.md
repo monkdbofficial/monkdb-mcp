@@ -40,6 +40,13 @@ This separation allows for easier integration, better security, and more maintai
 
 ---
 
+## Directory Layout
+
+- `mcp_monkdb`- This directory contains the code of MonkDB's MCP server for Python3 stacks.
+- `typescript`- This directory contains the code of MonkDB's MCP server for TS stacks.
+
+---
+
 ## README Index
 
 - [Python](./mcp_monkdb/README.md)
