@@ -1,6 +1,6 @@
 [project]
 name = "mcp-monkdb"
-version = "0.1.1"
+version = "0.1.2"
 description = "An MCP server for MonkDB"
 license = "Apache-2.0"
 authors = [
@@ -32,7 +32,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["mcp_monkdb"]
+packages = ["src/mcp_monkdb"]
 
 [tool.ruff]
 line-length = 100
