@@ -63,20 +63,24 @@ def to_json(obj: Any) -> str:
 @mcp.tool()
 def list_tables():
     """List available MonkDB tables under monkdb schema"""
-    logger.info("Listing all tables")
-    cursor = create_monkdb_client()
-    try:
-        cursor.execute("""
-            SELECT table_name FROM information_schema.tables WHERE table_schema = 'monkdb';
-        """)
-        rows = cursor.fetchall()
-        if not rows:
-            raise ValueError("No tables found in schema 'monkdb'")
-        logger.info(f"Found {len(rows)} tables")
-        return [{"table_name": row[0]} for row in rows]
-    except Exception as e:
-        logger.error(f"Failed to list tables: {str(e)}")
-        return {"status": "error", "message": str(e)}
+    with tracer.start_as_current_span("list_tables"):
+        logger.info("Listing all tables")
+        try:
+            cursor = create_monkdb_client()
+            cursor.execute("""
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'monkdb';
+            """)
+            rows = cursor.fetchall()
+            if not rows:
+                raise ValueError("No tables found in schema 'monkdb'")
+
+            return [{"table_name": row[0]} for row in rows]
+        except Exception as e:
+            trace.get_current_span().record_exception(e)
+            trace.get_current_span().set_status(Status(StatusCode.ERROR, str(e)))
+            logger.error(f"Failed to list tables: {str(e)}")
+            return {"status": "error", "message": str(e)}
 
 
 def execute_query(query: str):
