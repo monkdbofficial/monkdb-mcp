@@ -25,18 +25,22 @@ mcp-monkdb = "mcp_monkdb.main:main"
 [project.urls]
 Home = "https://github.com/monkdbofficial/monkdb-mcp"
 
-[project.optional-dependencies]
-dev = [
-    "ruff",
-    "pytest"
-]
-otel = [
-    "opentelemetry-sdk",
-    "opentelemetry-instrumentation",
-    "opentelemetry-exporter-otlp",
-    "opentelemetry-instrumentation-fastapi",
-    "opentelemetry-instrumentation-requests"
-]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+pytest = "*"
+
+[tool.poetry.group.otel]
+optional = true
+
+[tool.poetry.group.otel.dependencies]
+opentelemetry-sdk = "*"
+opentelemetry-instrumentation = "*"
+opentelemetry-exporter-otlp = "*"
+opentelemetry-instrumentation-fastapi = "*"
+opentelemetry-instrumentation-requests = "*"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_monkdb"]
