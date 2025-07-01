@@ -76,20 +76,28 @@ Update the environment variables to point to your own MonkDB cluster.
 **Note**: you may also use `poetry` instead of `uv`.
 
 ```json
-"mcpServers": {
-  "mcp-monkdb": {
-    "command": "poetry",
-    "args": [
-      "run",
-      "python",
-      "-m",
-      "mcp_monkdb"
-    ],
-    "env": {
-      "MONKDB_HOST": "<monkdb-host>",
-      "MONKDB_API_PORT": "<monkdb-port>",
-      "MONKDB_USER": "<monkdb-user>",
-      "MONKDB_PASSWORD": "<monkdb-password>"
+{
+  "mcpServers": {
+    "mcp-monkdb": {
+      "command": "poetry",
+      "args": [
+        "run",
+        "python",
+        "-m",
+        "mcp_monkdb"
+      ],
+      "env": {
+        "MONKDB_HOST": "<monkdb-host>",
+        "MONKDB_API_PORT": "<monkdb-port>",
+        "MONKDB_USER": "<monkdb-user>",
+        "MONKDB_PASSWORD": "<monkdb-password>",
+
+        // Optional OTEL Configuration
+        "MONKDB_OTEL_ENABLED": "true",
+        "MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT": "https://your-otel-endpoint:4318",
+        "MONKDB_OTEL_SERVICE_NAME": "mcp-monkdb",
+        "MONKDB_OTEL_AUTH_HEADER": "Authorization=Bearer your-token-here"
+      }
     }
   }
 }
@@ -138,6 +146,7 @@ MONKDB_OTEL_ENABLED=true
 MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT=https://my-otel-collector:4318
 MONKDB_OTEL_SERVICE_NAME=mcp-monkdb
 MONKDB_OTEL_AUTH_HEADER=Authorization=Bearer xyz123
+```
 
 These can also be configured directly inside your Claude Desktop config:
 
