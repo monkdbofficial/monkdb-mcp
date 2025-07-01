@@ -55,6 +55,12 @@ An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabli
         "MONKDB_API_PORT": "<monkdb-port>",
         "MONKDB_USER": "<monkdb-user>",
         "MONKDB_PASSWORD": "<monkdb-password>",
+
+        // Optional OTEL Configuration
+        "MONKDB_OTEL_ENABLED": "true",
+        "MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT": "https://your-otel-endpoint:4318",
+        "MONKDB_OTEL_SERVICE_NAME": "mcp-monkdb",
+        "MONKDB_OTEL_AUTH_HEADER": "Authorization=Bearer your-token-here"
       }
     }
   }
