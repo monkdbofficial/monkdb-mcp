@@ -1,8 +1,11 @@
-# MonkDB MCP Server
+# Official MonkDB MCP Server
 
-![Python](https://img.shields.io/badge/Python-3.13%2B-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Stable](https://img.shields.io/badge/stability-stable-brightgreen) ![Version](https://img.shields.io/badge/version-0.1.0-blue) ![Last Updated](https://img.shields.io/badge/last%20updated-May%2005%202025-brightgreen)
+![Python](https://img.shields.io/badge/Python-3.13%2B-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Stable](https://img.shields.io/badge/stability-stable-brightgreen) ![Version](https://img.shields.io/badge/version-0.2.1-blue) ![Last Updated](https://img.shields.io/badge/last%20updated-July%2001%202025-brightgreen)
 
 An **MCP (Modular Command Protocol)** server for interacting with MonkDB, enabling Claude like LLMs to execute database-related tools such as querying, table inspection, and server health checks.
+
+> [!CAUTION]
+> Treat your MCP database user as you would any external client connecting to your database, granting only the minimum necessary privileges. Avoid using default or admin users in production environments.
 
 ## Features
 
@@ -89,59 +92,76 @@ Update the environment variables to point to your own MonkDB cluster.
 
 ### Environment Variables
 
-The following environment variables are used to configure the MonkDB connection:
+The following environment variables are used to configure the MonkDB connection and optional OpenTelemetry (OTEL) tracing.
 
 #### Required Variables
 
-* `MONKDB_HOST`: The hostname of your MonkDB server
-* `MONKDB_USER`: The username for authentication
-* `MONKDB_PASSWORD`: The password for authentication
-* `MONKDB_API_PORT`: The API port of MonkDB which is `4200`.
-
-> [!CAUTION]
-> It is important to treat your MCP database user as you would any external client connecting to your database, granting only the minimum necessary privileges required for its operation. The use of default or administrative users should be strictly avoided at all times.
+- `MONKDB_HOST`: The hostname or IP address of your MonkDB server.
+- `MONKDB_USER`: The username for authentication.
+- `MONKDB_PASSWORD`: The password for authentication.
+- `MONKDB_API_PORT`: The API port of MonkDB (default is `4200`).
 
 #### Optional Variables
 
-* `MONKDB_SCHEMA`: The schema of MonkDB. By default, MonkDB provides a universal schema `monkdb` under which tables are created. Access to these tables are restricted by RBAC policies provided by MonkDB. 
+- `MONKDB_SCHEMA`: The schema of MonkDB. Defaults to `monkdb`. Tables under this schema are protected by RBAC policies.
 
-#### Example Configurations
+#### Optional OTEL Tracing Variables
+
+To enable distributed tracing using OpenTelemetry:
+
+- `MONKDB_OTEL_ENABLED`: Set to `true` to enable tracing.
+- `MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT`: The OTLP HTTP endpoint (e.g. `http://localhost:4318` or `https://your-collector.com:4318`).
+- `MONKDB_OTEL_SERVICE_NAME`: Logical name for trace viewers (e.g., `mcp-monkdb`).
+- `MONKDB_OTEL_AUTH_HEADER`: (Optional) Auth header if your OTEL collector requires it.  
+  Format: `Authorization=Bearer <token>` or `api-key=XYZ123`.
+
+> **Note**  
+> If you're using a local OTEL collector with no auth, `MONKDB_OTEL_AUTH_HEADER` can be omitted.
+
+#### Example `.env` Configuration
 
 ```env
-MONKDB_HOST=xx.xx.xx.xxx #update the hostname or ip address of monkdb
+MONKDB_HOST=xx.xx.xx.xxx
 MONKDB_USER=testuser
 MONKDB_PASSWORD=testpassword
 MONKDB_API_PORT=4200
-
-# Not needed as by default it is monkdb.
 MONKDB_SCHEMA=monkdb
-```
 
-You can set these variables in your environment, in a `.env` file, or in the Claude Desktop configuration:
+# OpenTelemetry tracing (optional)
+MONKDB_OTEL_ENABLED=true
+MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT=https://my-otel-collector:4318
+MONKDB_OTEL_SERVICE_NAME=mcp-monkdb
+MONKDB_OTEL_AUTH_HEADER=Authorization=Bearer xyz123
+
+These can also be configured directly inside your Claude Desktop config:
 
 ```json
 {
   "mcpServers": {
     "mcp-monkdb": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--with",
-        "mcp-monkdb",
-        "--python",
-        "3.13",
-        "mcp-monkdb"
-      ],
+      "command": "poetry",
+      "args": ["run", "python", "-m", "mcp_monkdb"],
       "env": {
         "MONKDB_HOST": "<monkdb-host>",
         "MONKDB_API_PORT": "<monkdb-port>",
         "MONKDB_USER": "<monkdb-user>",
         "MONKDB_PASSWORD": "<monkdb-password>",
+        "MONKDB_OTEL_ENABLED": "true",
+        "MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT": "https://your-otel-host:4318",
+        "MONKDB_OTEL_SERVICE_NAME": "mcp-monkdb",
+        "MONKDB_OTEL_AUTH_HEADER": "Authorization=Bearer your-token"
       }
     }
   }
 }
 ```
+
+#### Traced Operations
+
+| Operation           | ToolTraced? | Captured Attributes                                  |
+|---------------------|:-----------:|------------------------------------------------------|
+| run_select_query    | ✅          | `monkdb.query`, `monkdb.query.type` (select), `monkdb.query.rows`, `status` |
+
 
 ### Running tests
 
