@@ -14,13 +14,21 @@ def configure_otel():
     endpoint = os.getenv(
         "MONKDB_OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
     service_name = os.getenv("MONKDB_OTEL_SERVICE_NAME", "mcp-monkdb")
+    auth_header = os.getenv("MONKDB_OTEL_AUTH_HEADER", "")
+
+    headers = {}
+    if auth_header:
+        try:
+            key, value = auth_header.split("=", 1)
+            headers[key.strip()] = value.strip()
+        except ValueError:
+            print("Invalid MONKDB_OTEL_AUTH_HEADER format. Expected: Key=Value")
 
     resource = Resource(attributes={SERVICE_NAME: service_name})
     tracer_provider = TracerProvider(resource=resource)
     trace.set_tracer_provider(tracer_provider)
 
-    otlp_exporter = OTLPSpanExporter(endpoint=endpoint)
-    span_processor = BatchSpanProcessor(otlp_exporter)
-    tracer_provider.add_span_processor(span_processor)
+    exporter = OTLPSpanExporter(endpoint=endpoint, headers=headers)
+    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
 
     RequestsInstrumentor().instrument()
