@@ -5,6 +5,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/mcp-monkdb)](https://pypi.org/project/mcp-monkdb/)
 ![typescript-support](https://img.shields.io/badge/TypeScript-Supported-blue?logo=typescript)
 [![npm version](https://img.shields.io/npm/v/@monkdb/monkdb-mcp)](https://www.npmjs.com/package/@monkdb/monkdb-mcp)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 A **Model Context Protocol (MCP)** server acts as a standardized bridge between large language models (LLMs) like Claude and databases such as MonkDB, allowing these models to perform advanced database operations securely and efficiently through natural language instructions.
 
