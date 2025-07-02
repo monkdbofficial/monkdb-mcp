@@ -2,7 +2,7 @@
 
 ![typescript-support](https://img.shields.io/badge/TypeScript-Supported-blue?logo=typescript)
 ![python-support](https://img.shields.io/badge/Python-Supported-blueviolet?logo=python)
-[![MCP Certified](https://badge.mcpx.dev?status=on)](https://mcphub.com/mcp-servers/monkdbofficial/monkdb-mcp)
+[![MCP Certified](https://badge.mcpx.dev?status=on)](https://mcpmarket.com/server/monkdb)
 
 A **Model Context Protocol (MCP)** server acts as a standardized bridge between large language models (LLMs) like Claude and databases such as MonkDB, allowing these models to perform advanced database operations securely and efficiently through natural language instructions.
 
