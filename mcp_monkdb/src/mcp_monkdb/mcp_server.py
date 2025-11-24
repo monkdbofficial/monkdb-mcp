@@ -9,9 +9,13 @@ from monkdb import client
 
 import concurrent
 
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
 from mcp_monkdb.env_vals import get_config
 from mcp_monkdb.models import Column, Table
 
+tracer = trace.get_tracer(__name__)
 
 MCP_SERVER_NAME = "mcp-monkdb"
 
@@ -59,20 +63,24 @@ def to_json(obj: Any) -> str:
 @mcp.tool()
 def list_tables():
     """List available MonkDB tables under monkdb schema"""
-    logger.info("Listing all tables")
-    cursor = create_monkdb_client()
-    try:
-        cursor.execute("""
-            SELECT table_name FROM information_schema.tables WHERE table_schema = 'monkdb';
-        """)
-        rows = cursor.fetchall()
-        if not rows:
-            raise ValueError("No tables found in schema 'monkdb'")
-        logger.info(f"Found {len(rows)} tables")
-        return [{"table_name": row[0]} for row in rows]
-    except Exception as e:
-        logger.error(f"Failed to list tables: {str(e)}")
-        return {"status": "error", "message": str(e)}
+    with tracer.start_as_current_span("list_tables"):
+        logger.info("Listing all tables")
+        try:
+            cursor = create_monkdb_client()
+            cursor.execute("""
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'monkdb';
+            """)
+            rows = cursor.fetchall()
+            if not rows:
+                raise ValueError("No tables found in schema 'monkdb'")
+
+            return [{"table_name": row[0]} for row in rows]
+        except Exception as e:
+            trace.get_current_span().record_exception(e)
+            trace.get_current_span().set_status(Status(StatusCode.ERROR, str(e)))
+            logger.error(f"Failed to list tables: {str(e)}")
+            return {"status": "error", "message": str(e)}
 
 
 def execute_query(query: str):
@@ -98,41 +106,38 @@ def execute_query(query: str):
 @mcp.tool()
 def run_select_query(query: str):
     """Run a SELECT query in a MonkDB database"""
-    logger.info(f"Executing SELECT query: {query}")
+    with tracer.start_as_current_span("run_select_query") as span:
+        span.set_attribute("monkdb.query", query.strip())
+        span.set_attribute("monkdb.query.type", "select")
+        logger.info(f"Executing SELECT query: {query}")
 
-    # Enforce SELECT-only query for safety
-    if not query.strip().lower().startswith("select"):
-        logger.warning("Rejected non-SELECT query")
-        return {
-            "status": "error",
-            "message": "Only SELECT queries are allowed in this endpoint.",
-        }
+        if not query.strip().lower().startswith("select"):
+            msg = "Only SELECT queries are allowed in this endpoint."
+            span.set_status(Status(StatusCode.ERROR, msg))
+            return {"status": "error", "message": msg}
 
-    try:
-        future = QUERY_EXECUTOR.submit(execute_query, query)
         try:
+            future = QUERY_EXECUTOR.submit(execute_query, query)
             result = future.result(timeout=SELECT_QUERY_TIMEOUT_SECS)
 
             if isinstance(result, dict) and "error" in result:
-                logger.warning(f"Query failed: {result['error']}")
-                return {
-                    "status": "error",
-                    "message": f"Query failed: {result['error']}",
-                }
+                span.set_status(Status(StatusCode.ERROR, result["error"]))
+                return {"status": "error", "message": result["error"]}
 
+            span.set_status(Status(StatusCode.OK))
+            span.set_attribute("monkdb.query.rows", len(result))
             return result
+
         except concurrent.futures.TimeoutError:
-            logger.warning(
-                f"Query timed out after {SELECT_QUERY_TIMEOUT_SECS} seconds: {query}"
-            )
-            future.cancel()
-            return {
-                "status": "error",
-                "message": f"Query timed out after {SELECT_QUERY_TIMEOUT_SECS} seconds",
-            }
-    except Exception as e:
-        logger.error(f"Unexpected error in run_select_query: {str(e)}")
-        return {"status": "error", "message": f"Unexpected error: {str(e)}"}
+            msg = f"Query timed out after {SELECT_QUERY_TIMEOUT_SECS} seconds"
+            span.set_status(Status(StatusCode.ERROR, msg))
+            return {"status": "error", "message": msg}
+
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
+            span.record_exception(e)
+            span.set_status(Status(StatusCode.ERROR, str(e)))
+            return {"status": "error", "message": f"Unexpected error: {str(e)}"}
 
 
 @mcp.tool()

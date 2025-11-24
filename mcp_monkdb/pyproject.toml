@@ -1,6 +1,6 @@
 [project]
 name = "mcp-monkdb"
-version = "0.1.2"
+version = "0.2.1"
 description = "An MCP server for MonkDB"
 license = "Apache-2.0"
 authors = [
@@ -23,13 +23,24 @@ packages = [{include = "mcp_monkdb", from = "src"}]
 mcp-monkdb = "mcp_monkdb.main:main"
 
 [project.urls]
-Home = "https://bitbucket.org/monkdb/monkdb-mcp/src/main/"
+Home = "https://github.com/monkdbofficial/monkdb-mcp"
 
-[project.optional-dependencies]
-dev = [
-    "ruff",
-    "pytest"
-]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+pytest = "*"
+
+[tool.poetry.group.otel]
+optional = true
+
+[tool.poetry.group.otel.dependencies]
+opentelemetry-sdk = "*"
+opentelemetry-instrumentation = "*"
+opentelemetry-exporter-otlp = "*"
+opentelemetry-instrumentation-fastapi = "*"
+opentelemetry-instrumentation-requests = "*"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_monkdb"]
