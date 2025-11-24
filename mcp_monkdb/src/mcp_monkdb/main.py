@@ -3,7 +3,7 @@ from mcp_monkdb.otel_setup import configure_otel
 
 
 def main():
-    configure_otel(mcp.app)
+    configure_otel()
     mcp.run()
 
 
