@@ -1,10 +1,10 @@
 [project]
 name = "mcp-monkdb"
-version = "0.2.2"
+version = "0.2.3"
 description = "An MCP server for MonkDB"
 license = "Apache-2.0"
 authors = [
-    {name = "MonkDB Developers",email = "devs@monkdb.com"}
+    { name = "MonkDB Developers", email = "devs@monkdb.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -16,14 +16,35 @@ dependencies = [
     "monkdb>=1.0.5"
 ]
 
-[tool.poetry]
-packages = [{include = "mcp_monkdb", from = "src"}]
+# ------------------------------
+# REQUIRED FOR PIP EXTRAS
+# ------------------------------
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+]
+
+otel = [
+    "opentelemetry-api",                       # Provides the core API (trace, metrics, etc.)
+    "opentelemetry-sdk",                       # The SDK implementations
+    "opentelemetry-instrumentation",           # Base instrumentation library
+    "opentelemetry-exporter-otlp",             # OTLP exporter
+    "opentelemetry-instrumentation-fastapi",   # FastAPI instrumentation
+    "opentelemetry-instrumentation-requests", # Requests instrumentation
+]
 
 [project.scripts]
 mcp-monkdb = "mcp_monkdb.main:main"
 
 [project.urls]
 Home = "https://github.com/monkdbofficial/monkdb-mcp"
+
+# ------------------------------
+# POETRY GROUPS (ignored by pip but OK to keep)
+# ------------------------------
+[tool.poetry]
+packages = [{ include = "mcp_monkdb", from = "src" }]
 
 [tool.poetry.group.dev]
 optional = true
@@ -42,12 +63,21 @@ opentelemetry-exporter-otlp = "*"
 opentelemetry-instrumentation-fastapi = "*"
 opentelemetry-instrumentation-requests = "*"
 
+# ------------------------------
+# HATCH BUILD
+# ------------------------------
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_monkdb"]
 
+# ------------------------------
+# RUFF CONFIG
+# ------------------------------
 [tool.ruff]
 line-length = 100
 
+# ------------------------------
+# BUILD SYSTEM
+# ------------------------------
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
