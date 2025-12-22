@@ -85,4 +85,53 @@ describe('MonkDB MCP Server Tools (TS)', () => {
         expect(cols.some((c: any[]) => c[0] === 'id')).toBe(true);
         expect(cols.some((c: any[]) => c[0] === 'name')).toBe(true);
     });
+
+    it('should list schemas', async () => {
+        await cursor.execute('SELECT schema_name FROM information_schema.schemata ORDER BY schema_name');
+        const schemas = cursor.fetchall();
+        expect(schemas.length).toBeGreaterThan(0);
+        expect(schemas.some((s: any[]) => s[0] === testSchema)).toBe(true);
+    });
+
+    it('should list columns for test table', async () => {
+        await cursor.execute(`
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns
+            WHERE table_schema = $1 AND table_name = $2
+            ORDER BY ordinal_position
+        `, [testSchema, testTable]);
+        const cols = cursor.fetchall();
+        expect(cols.length).toBe(3);
+        expect(cols[0][0]).toBe('id');
+        expect(cols[1][0]).toBe('name');
+        expect(cols[2][0]).toBe('email');
+    });
+
+    it('should list indexes for schema (may be empty for new schema)', async () => {
+        await cursor.execute(`
+            SELECT indexname, indexdef
+            FROM pg_catalog.pg_indexes
+            WHERE schemaname = $1
+            ORDER BY indexname
+        `, [testSchema]);
+        const indexes = cursor.fetchall();
+        // MonkDB uses automatic Lucene indexing, so this may return empty or system indexes
+        expect(Array.isArray(indexes)).toBe(true);
+    });
+
+    it('should explain query plan', async () => {
+        const explainQuery = `EXPLAIN SELECT * FROM ${testSchema}.${testTable} WHERE id = 1`;
+        await cursor.execute(explainQuery);
+        const plan = cursor.fetchall();
+        expect(Array.isArray(plan)).toBe(true);
+        expect(plan.length).toBeGreaterThan(0);
+    });
+
+    it('should explain analyze query with actual execution', async () => {
+        const explainQuery = `EXPLAIN ANALYZE SELECT * FROM ${testSchema}.${testTable} WHERE id = 1`;
+        await cursor.execute(explainQuery);
+        const analyzePlan = cursor.fetchall();
+        expect(Array.isArray(analyzePlan)).toBe(true);
+        expect(analyzePlan.length).toBeGreaterThan(0);
+    });
 });
