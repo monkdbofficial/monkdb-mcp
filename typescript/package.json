@@ -35,7 +35,7 @@
     "@modelcontextprotocol/sdk": "^1.11.0",
     "@monkdb/monkdb": "^0.1.6",
     "dotenv": "^16.5.0",
-    "zod": "^3.24.4"
+    "zod": "4.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.11",
