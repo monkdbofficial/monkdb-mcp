@@ -310,6 +310,96 @@ server.tool(
     }
 );
 
+// Tool: explain_query
+server.tool(
+    'explain_query',
+    {
+        query: z.string(),
+    },
+    async ({ query }) => {
+        if (!query.trim().toLowerCase().startsWith('select')) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: 'Only SELECT queries are allowed for explain.',
+                    },
+                ],
+            };
+        }
+
+        const cursor = createMonkDBClient();
+        try {
+            await cursor.execute(`EXPLAIN ${query}`);
+            const rows = cursor.fetchall();
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(rows, null, 2),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `EXPLAIN failed: ${errorMessage(err)}`,
+                    },
+                ],
+            };
+        } finally {
+            cursor.close();
+        }
+    }
+);
+
+// Tool: explain_analyze
+server.tool(
+    'explain_analyze',
+    {
+        query: z.string(),
+    },
+    async ({ query }) => {
+        if (!query.trim().toLowerCase().startsWith('select')) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: 'Only SELECT queries are allowed for explain analyze.',
+                    },
+                ],
+            };
+        }
+
+        const cursor = createMonkDBClient();
+        try {
+            await cursor.execute(`EXPLAIN ANALYZE ${query}`);
+            const rows = cursor.fetchall();
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(rows, null, 2),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `EXPLAIN ANALYZE failed: ${errorMessage(err)}`,
+                    },
+                ],
+            };
+        } finally {
+            cursor.close();
+        }
+    }
+);
+
 // Start the server
 export async function startMonkDBMCPServer(): Promise<void> {
     const transport = new StdioServerTransport();
