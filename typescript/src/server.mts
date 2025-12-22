@@ -197,6 +197,119 @@ server.tool(
     }
 );
 
+// Tool: list_schemas
+server.tool(
+    'list_schemas',
+    {},
+    async () => {
+        const cursor = createMonkDBClient();
+        try {
+            await cursor.execute('SELECT schema_name FROM information_schema.schemata ORDER BY schema_name');
+            const rows = cursor.fetchall();
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(rows.map((row: any[]) => row[0]), null, 2),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error listing schemas: ${errorMessage(err)}`,
+                    },
+                ],
+            };
+        } finally {
+            cursor.close();
+        }
+    }
+);
+
+// Tool: list_columns
+server.tool(
+    'list_columns',
+    {
+        schema_name: z.string().optional().default(process.env.MONKDB_SCHEMA || 'monkdb'),
+        table_name: z.string(),
+    },
+    async ({ schema_name, table_name }) => {
+        const cursor = createMonkDBClient();
+        try {
+            await cursor.execute(`
+                SELECT column_name, data_type, is_nullable, column_default
+                FROM information_schema.columns
+                WHERE table_schema = $1 AND table_name = $2
+                ORDER BY ordinal_position
+            `, [schema_name, table_name]);
+
+            const rows = cursor.fetchall();
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(rows, null, 2),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Failed to list columns for table "${table_name}" in schema "${schema_name}": ${errorMessage(err)}`,
+                    },
+                ],
+            };
+        } finally {
+            cursor.close();
+        }
+    }
+);
+
+// Tool: list_indexes
+server.tool(
+    'list_indexes',
+    {
+        schema_name: z.string().optional().default(process.env.MONKDB_SCHEMA || 'monkdb'),
+    },
+    async ({ schema_name }) => {
+        const cursor = createMonkDBClient();
+        try {
+            await cursor.execute(`
+                SELECT indexname, indexdef
+                FROM pg_catalog.pg_indexes
+                WHERE schemaname = $1
+                ORDER BY indexname
+            `, [schema_name]);
+
+            const rows = cursor.fetchall();
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: JSON.stringify(rows, null, 2),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Failed to list indexes for schema "${schema_name}": ${errorMessage(err)}`,
+                    },
+                ],
+            };
+        } finally {
+            cursor.close();
+        }
+    }
+);
+
 // Start the server
 export async function startMonkDBMCPServer(): Promise<void> {
     const transport = new StdioServerTransport();
