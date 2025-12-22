@@ -1,6 +1,6 @@
 {
   "name": "@monkdb/monkdb-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "description": "MCP Server for MonkDB in TypeScript stack",
   "homepage": "https://github.com/monkdbofficial/monkdb-mcp",
