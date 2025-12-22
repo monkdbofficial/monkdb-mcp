@@ -19,4 +19,3 @@ export function createMonkDBClient() {
         throw new Error(`MonkDB connection error: ${message}`);
     }
 }
-
