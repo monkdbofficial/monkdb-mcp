@@ -104,28 +104,52 @@ def execute_query(query: str):
 
 
 @mcp.tool()
-def run_select_query(query: str):
-    """Run a SELECT query in a MonkDB database"""
+def run_select_query(query: str, limit: int | None = None, offset: int = 0):
+    """Run a SELECT query in a MonkDB database with pagination and hard limits"""
     with tracer.start_as_current_span("run_select_query") as span:
-        span.set_attribute("monkdb.query", query.strip())
+        query = query.strip()
+        span.set_attribute("monkdb.query", query)
         span.set_attribute("monkdb.query.type", "select")
         logger.info(f"Executing SELECT query: {query}")
 
-        if not query.strip().lower().startswith("select"):
+        # Basic safety check
+        if not query.lower().startswith("select"):
             msg = "Only SELECT queries are allowed in this endpoint."
             span.set_status(Status(StatusCode.ERROR, msg))
             return {"status": "error", "message": msg}
 
+        # Load configuration
+        config = get_config()
+
+        # Determine effective LIMIT
+        if limit is None:
+            if config.require_select_limit:
+                msg = "SELECT queries must specify a LIMIT."
+                span.set_status(Status(StatusCode.ERROR, msg))
+                return {"status": "error", "message": msg}
+            effective_limit = config.select_default_limit
+        else:
+            effective_limit = min(limit, config.select_max_limit)
+
+        # Sanitize OFFSET
+        effective_offset = max(offset, 0)
+
+        # Append LIMIT and OFFSET safely
+        paginated_query = f"{query.rstrip(';')} LIMIT {effective_limit} OFFSET {effective_offset}"
+
         try:
-            future = QUERY_EXECUTOR.submit(execute_query, query)
+            future = QUERY_EXECUTOR.submit(execute_query, paginated_query)
             result = future.result(timeout=SELECT_QUERY_TIMEOUT_SECS)
 
             if isinstance(result, dict) and "error" in result:
                 span.set_status(Status(StatusCode.ERROR, result["error"]))
                 return {"status": "error", "message": result["error"]}
 
-            span.set_status(Status(StatusCode.OK))
             span.set_attribute("monkdb.query.rows", len(result))
+            span.set_attribute("monkdb.query.limit", effective_limit)
+            span.set_attribute("monkdb.query.offset", effective_offset)
+            span.set_status(Status(StatusCode.OK))
+
             return result
 
         except concurrent.futures.TimeoutError:
@@ -138,7 +162,6 @@ def run_select_query(query: str):
             span.record_exception(e)
             span.set_status(Status(StatusCode.ERROR, str(e)))
             return {"status": "error", "message": f"Unexpected error: {str(e)}"}
-
 
 @mcp.tool()
 def health_check():
