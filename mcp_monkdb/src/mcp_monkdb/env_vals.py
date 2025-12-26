@@ -58,6 +58,22 @@ class MonkDBConfiguration:
         """Get the default schema name if set."""
         return os.getenv("MONKDB_SCHEMA")
 
+    @property
+    def select_default_limit(self) -> int:
+        """Default LIMIT for SELECT queries."""
+        return int(os.getenv("MCP_SELECT_DEFAULT_LIMIT", 100))
+
+    @property
+    def select_max_limit(self) -> int:
+        """Hard maximum LIMIT for SELECT queries."""
+        return int(os.getenv("MCP_SELECT_MAX_LIMIT", 1000))
+
+    @property
+    def require_select_limit(self) -> bool:
+        """Whether SELECT queries must explicitly specify a LIMIT."""
+        return os.getenv("MCP_REQUIRE_LIMIT", "false").lower() == "true"
+        
+
     def get_client_config(self) -> dict:
         """Get the config dictionary for MonkDB py sdk/client.
 

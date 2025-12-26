@@ -5,7 +5,20 @@ import logging
 from typing import Any, List
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
-from monkdb import client
+from typing import TYPE_CHECKING
+import concurrent.futures
+import os
+import re
+from opentelemetry.trace import Status, StatusCode
+
+# Configurable limits
+DEFAULT_LIMIT = int(os.getenv("MONKDB_DEFAULT_LIMIT", 100))
+MAX_ROWS = int(os.getenv("MONKDB_MAX_ROWS", 100))
+SELECT_QUERY_TIMEOUT_SECS = int(os.getenv("MONKDB_SELECT_TIMEOUT_SECS", 10))
+
+if TYPE_CHECKING:
+    from monkdb import client
+
 
 import concurrent
 
@@ -104,28 +117,48 @@ def execute_query(query: str):
 
 
 @mcp.tool()
-def run_select_query(query: str):
-    """Run a SELECT query in a MonkDB database"""
-    with tracer.start_as_current_span("run_select_query") as span:
-        span.set_attribute("monkdb.query", query.strip())
-        span.set_attribute("monkdb.query.type", "select")
-        logger.info(f"Executing SELECT query: {query}")
 
-        if not query.strip().lower().startswith("select"):
+def run_select_query(query: str):
+    """Run a SELECT query in a MonkDB database with safety checks"""
+    with tracer.start_as_current_span("run_select_query") as span:
+        query_stripped = query.strip()
+        span.set_attribute("monkdb.query", query_stripped)
+        span.set_attribute("monkdb.query.type", "select")
+
+        # 1️⃣ Only SELECT allowed
+        if not query_stripped.lower().startswith("select"):
             msg = "Only SELECT queries are allowed in this endpoint."
             span.set_status(Status(StatusCode.ERROR, msg))
             return {"status": "error", "message": msg}
 
-        try:
-            future = QUERY_EXECUTOR.submit(execute_query, query)
-            result = future.result(timeout=SELECT_QUERY_TIMEOUT_SECS)
+        # 2️⃣ LIMIT is mandatory
+        if not re.search(r"\blimit\s+\d+\b", query_stripped, re.IGNORECASE):
+            msg = "LIMIT is required for SELECT queries"
+            span.set_status(Status(StatusCode.ERROR, msg))
+            return {"status": "error", "message": msg}
 
+        try:
+            # 3️⃣ Execute query with timeout
+            future = QUERY_EXECUTOR.submit(execute_query, query_stripped)
+            try:
+                result = future.result(timeout=SELECT_QUERY_TIMEOUT_SECS)
+            except concurrent.futures.TimeoutError:
+                raise
+
+            # 4️⃣ Error propagated from execute_query
             if isinstance(result, dict) and "error" in result:
                 span.set_status(Status(StatusCode.ERROR, result["error"]))
                 return {"status": "error", "message": result["error"]}
 
+            # 5️⃣ Enforce hard max rows
+            if isinstance(result, list) and len(result) > MAX_ROWS:
+                result = result[:MAX_ROWS]
+
+            span.set_attribute(
+                "monkdb.query.rows",
+                len(result) if isinstance(result, list) else 0,
+            )
             span.set_status(Status(StatusCode.OK))
-            span.set_attribute("monkdb.query.rows", len(result))
             return result
 
         except concurrent.futures.TimeoutError:
@@ -134,11 +167,12 @@ def run_select_query(query: str):
             return {"status": "error", "message": msg}
 
         except Exception as e:
-            logger.error(f"Unexpected error: {str(e)}")
             span.record_exception(e)
             span.set_status(Status(StatusCode.ERROR, str(e)))
-            return {"status": "error", "message": f"Unexpected error: {str(e)}"}
-
+            return {
+                "status": "error",
+                "message": f"Unexpected error: {str(e)}",
+            }
 
 @mcp.tool()
 def health_check():
